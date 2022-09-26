@@ -89,6 +89,8 @@ export default {
         this.loading = true
         await this.$store.dispatch('user/loginActions', this.loginForm)
         this.$router.push('/')
+      } catch (error) {
+        console.log(error)
       } finally {
         this.loading = false
       }
