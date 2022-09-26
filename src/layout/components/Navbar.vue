@@ -11,9 +11,9 @@
     <div class="right-menu">
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
-          <img src="../../assets/common/head.jpg" class="user-avatar">
+          <img v-imgerror="defaultImg" :src="staffPhoto" class="user-avatar">
           <i class="el-icon-caret-bottom" />
-          <span>用户名</span>
+          <span>{{ name }}</span>
         </div>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
           <router-link to="/">
@@ -32,6 +32,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import defaultImg from '@/assets/common/head.jpg'
 // import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
 
@@ -40,10 +41,17 @@ export default {
     // Breadcrumb,
     Hamburger
   },
+  data() {
+    return {
+      defaultImg: defaultImg
+    }
+  },
   computed: {
     ...mapGetters([
       'sidebar',
-      'avatar'
+      'avatar',
+      'name',
+      'staffPhoto'
     ])
   },
   methods: {

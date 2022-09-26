@@ -14,7 +14,12 @@ import router from './router'
 
 import '@/icons' // icon
 import '@/permission' // permission control
+import * as directives from '@/directives'
 
+Object.keys(directives).forEach(ele => {
+  Vue.directive(ele, directives[ele])
+})
+// Vue.directive('imgerror', imgerror)
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api
