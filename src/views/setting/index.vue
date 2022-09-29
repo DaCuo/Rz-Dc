@@ -2,7 +2,7 @@
   <div class="app-container">
     <el-card shadow="always">
       <el-tabs v-model="activeName">
-        <el-tab-pane label="用户管理development" name="first">
+        <el-tab-pane label="用户管理" name="first">
           <el-row :gutter="10">
             <el-button type="primary" style="margin-left: 10px; margin-bottom:20px" class="el-icon-plus" @click="add">新增角色</el-button>
           </el-row>
