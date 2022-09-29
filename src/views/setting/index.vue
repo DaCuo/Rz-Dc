@@ -51,7 +51,29 @@
             />
           </el-row>
         </el-tab-pane>
-        <el-tab-pane label="配置管理" name="second">配置管理</el-tab-pane>
+        <el-tab-pane label="配置管理" name="second">
+          <el-alert
+            title="对公司名称、公司地址、营业执照、公司地区的更新，将使得公司资料被重新审核，请谨慎修改"
+            type="info"
+            show-icon
+            :closable="false"
+          />
+          <el-form :model="CompanyInfo" label-width="120px" style="margin-top:50px">
+            <el-form-item label="公司名称">
+              <el-input v-model="CompanyInfo.name" disabled style="width:400px" />
+            </el-form-item>
+            <el-form-item label="公司地址">
+              <el-input v-model="CompanyInfo.companyAddress" disabled style="width:400px" />
+            </el-form-item>
+            <el-form-item label="邮箱">
+              <el-input v-model="CompanyInfo.mailbox" disabled style="width:400px" />
+            </el-form-item>
+            <el-form-item label="备注">
+              <el-input v-model="CompanyInfo.remarks" type="textarea" :rows="3" disabled style="width:400px" />
+            </el-form-item>
+          </el-form>
+
+        </el-tab-pane>
       </el-tabs>
     </el-card>
     <addRoults ref="editRolt" :dialog-visible.sync="dialogVisible" @refsFormData="getRolesList" />
@@ -59,7 +81,7 @@
 </template>
 
 <script>
-import { getUserList, deleteRole } from '@/api/setting'
+import { getUserList, deleteRole, getCompanyInfoAPI } from '@/api/setting'
 import addRoults from './components/addRoults.vue'
 export default {
   name: 'HrsaasIndex',
@@ -77,11 +99,13 @@ export default {
       loading: false,
       total: 0,
       activeName: 'first',
-      dialogVisible: false
+      dialogVisible: false,
+      CompanyInfo: {}
     }
   },
-  mounted() {
+  created() {
     this.getRolesList()
+    this.getCompanyInfo()
   },
 
   methods: {
@@ -89,9 +113,12 @@ export default {
       try {
         this.loading = true
         const { total, rows } = await getUserList(this.page)
+        if (total > 0 && rows.length === 0) {
+          this.page.page--
+          this.getRolesList()
+        }
         this.pagelist = rows
         this.total = total
-        // console.log(rows)
       } catch (error) {
         console.log(error)
       } finally {
@@ -118,6 +145,9 @@ export default {
       } catch (error) {
         console.log('取消删除')
       }
+    },
+    async getCompanyInfo() {
+      this.CompanyInfo = await getCompanyInfoAPI(this.$store.getters.companyId)
     }
   }
 }

@@ -34,3 +34,7 @@ export function deleteRole(id) {
     method: 'delete'
   })
 }
+
+export const getCompanyInfoAPI = (companyId) => {
+  return request({ url: `/company/${companyId}` })
+}
