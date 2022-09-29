@@ -1,5 +1,5 @@
 //  引入封装后的axios
-import require from '@/utils/request'
+import request from '@/utils/request'
 
 /**
  *
@@ -7,7 +7,7 @@ import require from '@/utils/request'
  * @returns
  */
 export function loginAPI(data) {
-  return require({
+  return request({
     url: '/sys/login',
     method: 'POST',
     data
