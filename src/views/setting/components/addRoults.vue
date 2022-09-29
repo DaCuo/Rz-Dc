@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-dialog
-      title="新增角色"
+      :title="title"
       width="60%"
       :visible.sync="dialogVisible"
       :before-close="edit"
@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import { addRole } from '@/api/setting'
+import { addRole, updateRole } from '@/api/setting'
 export default {
   props: {
     dialogVisible: {
@@ -49,22 +49,31 @@ export default {
         name: '',
         description: ''
       },
-      looading: false
+      loading: false
+    }
+  },
+  computed: {
+    title() {
+      return this.formData.id ? '编辑角色' : '新增角色'
     }
   },
   methods: {
     edit() {
       this.$emit('update:dialog-visible', false)
       this.$refs.roleDialogForm.resetFields()
+      this.formData = {
+        name: '',
+        description: ''
+      }
     },
     async submit() {
       try {
         await this.$refs.roleDialogForm.validate()
         // 通过表单验证后在数据请求回来之前显示加载属性
         this.loading = true
-        await addRole(this.formData)
+        this.formData.id ? updateRole(this.formData) : await addRole(this.formData)
         this.$emit('refsFormData')
-        this.$message.success('新增成功')
+        this.formData.id ? this.$message.success('编辑成功') : this.$message.success('新增成功')
         this.edit()
       } catch (error) {
         console.log(error)

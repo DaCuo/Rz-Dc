@@ -4,7 +4,7 @@
       <el-tabs v-model="activeName">
         <el-tab-pane label="用户管理" name="first">
           <el-row :gutter="10">
-            <el-button type="primary" style="margin-left: 10px;" class="el-icon-plus" @click="add">新增角色</el-button>
+            <el-button type="primary" style="margin-left: 10px; margin-bottom:20px" class="el-icon-plus" @click="add">新增角色</el-button>
           </el-row>
           <template>
             <el-table
@@ -32,8 +32,8 @@
               >
                 <template slot-scope="{row}">
                   <el-button size="small" type="success">分配权限</el-button>
-                  <el-button ref="editRolt" size="small" type="primary" @click="edit(row)">编辑</el-button>
-                  <el-button size="small" type="danger">删除</el-button>
+                  <el-button size="small" type="primary" @click="edit(row)">编辑</el-button>
+                  <el-button size="small" type="danger" @click="del(row.id)">删除</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -54,12 +54,12 @@
         <el-tab-pane label="配置管理" name="second">配置管理</el-tab-pane>
       </el-tabs>
     </el-card>
-    <addRoults :dialog-visible.sync="dialogVisible" @refsFormData="getRolesList" />
+    <addRoults ref="editRolt" :dialog-visible.sync="dialogVisible" @refsFormData="getRolesList" />
   </div>
 </template>
 
 <script>
-import { getUserList } from '@/api/setting'
+import { getUserList, deleteRole } from '@/api/setting'
 import addRoults from './components/addRoults.vue'
 export default {
   name: 'HrsaasIndex',
@@ -91,7 +91,7 @@ export default {
         const { total, rows } = await getUserList(this.page)
         this.pagelist = rows
         this.total = total
-        console.log(rows)
+        // console.log(rows)
       } catch (error) {
         console.log(error)
       } finally {
@@ -102,8 +102,22 @@ export default {
       this.dialogVisible = true
     },
     edit(row) {
-      this.$refs.editRolt.formData = row
+      console.log(row)
+      this.$refs.editRolt.formData = { ...row }
       this.dialogVisible = true
+    },
+    async   del(id) {
+      try {
+        await this.$confirm('是否确认删除此角色?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+        await deleteRole(id)
+        this.getRolesList()
+      } catch (error) {
+        console.log('取消删除')
+      }
     }
   }
 }
