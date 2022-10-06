@@ -1,14 +1,14 @@
 <template>
-  <div class="departments-container">
+  <div v-loading="loading" class="departments-container">
     <!-- 头部 -->
     <el-card>
       <terrTools :tree-tools="company" :is-show="false" @addDept="addDept" />
     </el-card>
     <!-- 树状图 -->
     <el-tree :data="departs" :default-expand-all="true" :props="defaultData">
-      <terrTools slot-scope="{data}" :tree-tools="data" @addDept="addDept" />
+      <terrTools slot-scope="{data}" :tree-tools="data" @addDept="addDept" @editDepts="editDepts" @parentRefreshList="getDepartments" />
     </el-tree>
-    <adddept :dlvissible.sync="dlvissible" :code-node="codeNode" />
+    <adddept ref="addDept" :dlvissible.sync="dlvissible" :code-node="codeNode" />
   </div>
 </template>
 
@@ -32,7 +32,8 @@ export default {
       },
       company: {},
       dlvissible: false,
-      codeNode: {}
+      codeNode: {},
+      loading: false
     }
   },
   mounted() {
@@ -41,14 +42,26 @@ export default {
 
   methods: {
     async getDepartments() {
-      const { depts, companyManage, companyName } = await getDepartments()
-      this.departs = tranListToTreeData(depts, '')
-      this.company = { name: companyName, manager: companyManage, id: '' }
+      try {
+        this.loading = true
+        const { depts, companyManage, companyName } = await getDepartments()
+        this.departs = tranListToTreeData(depts, '')
+        this.company = { name: companyName, manager: companyManage, id: '' }
+      } catch (error) {
+        new Error(error)
+      } finally {
+        this.loading = false
+      }
     },
     addDept(node) {
       this.dlvissible = true
-      console.log({ node })
       this.codeNode = node
+    },
+    editDepts(node) {
+      // console.log(node)
+      this.codeNode = { ...node }
+      this.$refs.addDept.formData = { ...node }
+      this.dlvissible = true
     }
   }
 }

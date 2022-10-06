@@ -20,6 +20,7 @@
 </template>
 
 <script>
+import { delDepartments } from '@/api/departments'
 export default {
   props: {
     treeTools: {
@@ -32,15 +33,18 @@ export default {
     }
   },
   methods: {
-    handleCommand(type) {
-      console.log(type)
+    async handleCommand(type) {
+      // console.log(type)
       if (type === 'add') {
-        console.log(1111)
         this.$emit('addDept', this.treeTools)
       } else if (type === 'edit') {
-        console.log(111)
+        // console.log(111)
+        this.$emit('editDepts', this.treeTools)
       } else {
-        console.log(2222)
+        await this.$confirm('确认是否删除该部门', '提示', { type: 'warning' })
+        await delDepartments(this.treeTools.id)
+        this.$message.success('删除成功')
+        this.$emit('parentRefreshList')
       }
     }
   }

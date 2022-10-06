@@ -1,6 +1,6 @@
 <template>
   <!-- 新增部门的弹层 -->
-  <el-dialog title="新增部门" :visible="dlvissible" @close="isShow">
+  <el-dialog :title="title" :visible="dlvissible" @close="isShow">
     <!-- 表单组件  el-form   label-width设置label的宽度   -->
     <!-- 匿名插槽 -->
     <el-form ref="addDeptFrom" label-width="120px" :model="formData" :rules="rules">
@@ -11,8 +11,8 @@
         <el-input v-model.trim="formData.code" style="width:80%" placeholder="1-50个字符" />
       </el-form-item>
       <el-form-item label="部门负责人" prop="manager">
-        <el-select v-model.trim="formData.manager" style="width:80%" placeholder="请选择">
-          <el-option label="username11" value="username" />
+        <el-select v-model.trim="formData.manager" style="width:80%" placeholder="请选择" @focus="getEmployeeSimple">
+          <el-option v-for="item in manageList" :key="item.id" :label="item.username" :value="item.username" />
         </el-select>
       </el-form-item>
       <el-form-item label="部门介绍" prop="introduce">
@@ -24,14 +24,15 @@
       <!-- 列被分为24 -->
       <el-col :span="6">
         <el-button size="small" @click="isShow">取消</el-button>
-        <el-button type="primary" size="small">确定</el-button>
+        <el-button v-loading="loading" type="primary" size="small" @click="submit">确定</el-button>
       </el-col>
     </el-row>
   </el-dialog>
 </template>
 
 <script>
-import { getDepartments } from '@/api/departments'
+import { getDepartments, addDepartments, updateDepartments } from '@/api/departments'
+import { getEmployeeSimple } from '@/api/employees'
 export default {
   name: 'Adddept',
   props: {
@@ -75,27 +76,68 @@ export default {
           { required: true, message: '部门编码必填 1-300个字符', trigger: 'blur' },
           { min: 1, max: 300, trigger: 'blur' }
         ]
-      }
+      },
+      manageList: [],
+      loading: false
     }
+  },
+  computed: {
+    title() {
+      return this.formData.id ? '编辑部门' : '新增部门'
+    }
+
   },
   methods: {
     // 自定义 部门校验
     async  nameCode(rules, val, callback) {
       const { depts } = await getDepartments()
-      const deptstj = depts.filter(item => item.pid === this.codeNode.id).some(item => item.name === val)
+      let deptstj = true
+      if (this.formData.id) {
+        deptstj = depts.filter(item => item.pid === this.formData.pid && item.id !== this.codeNode.id).some(item => item.name === val)
+      } else {
+        deptstj = depts.filter(item => item.pid === this.codeNode.id).some(item => item.name === val)
+      }
       // console.log(deptstj)
       deptstj ? callback(new Error(`该部门中已经有部门使用${val}名称`)) : callback()
     },
     // 自定义 编码校验
     async  addCode(rules, val, callback) {
       const { depts } = await getDepartments()
-      console.log(depts)
-      const isRepeat = depts.some(item => item.code === val)
+      let isRepeat = true
+      // console.log(depts)
+      if (this.formData.id) {
+        isRepeat = depts.some(item => item.id !== this.formData.id && item.code === val)
+      } else {
+        isRepeat = depts.some(item => item.code === val)
+      }
       isRepeat ? callback(new Error(`组织架构中已经有部门使用${val}编码`)) : callback()
     },
     isShow() {
       this.$emit('update:dlvissible', false)
       this.$refs.addDeptFrom.resetFields()
+      this.formData = {
+        name: '', // 部门名称
+        code: '', // 部门编码
+        manager: '', // 部门管理者
+        introduce: '' // 部门介绍
+      }
+    },
+    async getEmployeeSimple() {
+      const res = await getEmployeeSimple()
+      this.manageList = res
+    },
+    async submit() {
+      try {
+        await this.$refs.addDeptFrom.validate()
+        this.loading = true
+        this.formData.id ? await updateDepartments(this.formData) : await addDepartments({ ...this.formData, pid: this.codeNode.id })
+        this.$parent.getDepartments()
+        this.isShow()
+      } catch (error) {
+        console.log(error)
+      } finally {
+        this.loading = false
+      }
     }
   }
 }
