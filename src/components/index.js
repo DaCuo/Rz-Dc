@@ -1,5 +1,6 @@
 // import PageTools from './PageTools/index.vue'
-
+import * as filters from '@/filters/index'
+// console.log(filters)
 // const components = [PageTools]
 
 // export default {
@@ -10,16 +11,16 @@
 //     })
 //   }
 // }
-
 const fn = require.context('./', true, /\.vue$/)
-const fn1 = require.context('./', true, /^[^\/]+\/statistics\/?(?:[^\/]+\/?)*$/gm)
-console.log(fn1.keys())
 // console.log(fn.keys())
 // console.log(fn('./PageTools/index.vue'))
 const components = fn.keys().map(ele => fn(ele))
 export default (Vue) => {
   components.forEach(ele => {
     Vue.component(ele.default.name, ele.default)
+  })
+  Object.keys(filters).forEach(key => {
+    Vue.filter(key, filters[key])
   })
 }
 
