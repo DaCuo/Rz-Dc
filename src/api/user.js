@@ -15,4 +15,11 @@ export const getUserDetailById = (id) => {
   })
 }
 
-export function logout() {}
+export const saveUserDetailById = (data) => {
+  return request({
+    url: `/sys/user/${data.id}`,
+    method: 'PUT',
+    data
+  })
+}
+
