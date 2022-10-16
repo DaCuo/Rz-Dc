@@ -20,6 +20,12 @@
             {{ (page.page - 1) * 10 + $index + 1 }}
           </template>
         </el-table-column>
+        <el-table-column label="头像" prop="staffPhoto">
+          <template slot-scope="{row}">
+            <img style="width:100px;height:100px;" :src="row.staffPhoto" alt="" @click="displayPic(row.staffPhoto)">
+          </template>
+          <!-- 预览头像 -->
+        </el-table-column>
         <el-table-column label="姓名" prop="username" />
         <el-table-column label="工号" prop="workNumber" />
         <el-table-column label="聘用形式" prop="formOfEmployment" :formatter="formatterFn">
@@ -69,6 +75,13 @@
         />
       </el-row>
     </el-card>
+    <el-dialog
+      title="预览头像"
+      :visible.sync="dialogVisiblePic"
+      width="50%"
+    >
+      <canvas ref="myCanvas" />
+    </el-dialog>
   </div>
 </template>
 
@@ -77,6 +90,7 @@ import dayjs from 'dayjs'
 import employeesType from '@/api/constant/employees'
 import { getEmployeeList, delEmployee } from '@/api/employees'
 import AddEmployee from './components/AddEmployee.vue'
+import QRCode from 'qrcode'
 export default {
   name: 'HrsaasIndex',
   components: {
@@ -93,7 +107,8 @@ export default {
       total: 0,
       loading: false,
       hireType: employeesType.hireType,
-      dialogVisible: false
+      dialogVisible: false,
+      dialogVisiblePic: false
     }
   },
   computed: {
@@ -175,6 +190,15 @@ export default {
     },
     seeDetail({ id }) {
       this.$router.push(`/detail/${id}`)
+    },
+    displayPic(staffPhoto) {
+      if (!staffPhoto) return this.$message.error('该用户没上传头像')
+      this.dialogVisiblePic = true
+      this.$nextTick(() => {
+        // 此时可以确认已经有ref对象了
+        QRCode.toCanvas(this.$refs.myCanvas, staffPhoto) // 将地址转化成二维码
+        // 如果转化的二维码后面信息 是一个地址的话 就会跳转到该地址 如果不是地址就会显示内容
+      })
     }
   }
 }

@@ -15,6 +15,11 @@ export default {
       component: () => import('@/views/employees/detail.vue'),
       // alwaysShow: true
       hidden: true
+    },
+    {
+      path: '/print/:id',
+      component: () => import('@/views/employees/components/Print.vue'),
+      hidden: true
     }
   ]
 }
